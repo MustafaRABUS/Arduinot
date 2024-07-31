@@ -1,0 +1,74 @@
+//DATA TRANSMISSION WITH 940 nm LASER TRANSMITTER AND PHOTOTRANSISTOR RECEIVER:
+/*//////////////////////////////////////////////////////////////////////////////////////////////////
+PROJECT WORKING VIDEO:
+https://www.youtube.com/@MstfRbs/videos
+ATTENTION: Sensors must be absolutely isolated from photons other than signals coming from the laser.
+*////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// 1) TRANSMITTER MICROCONTROLLER CODES:
+//////////////////////////////////////////////////////////////////////////////////////////
+// CONVERTS STRING EXPRESSIONS TO CHAR, THEN TO BITS AND BROADCASTS THEM AS LASER SIGNALS:
+//////////////////////////////////////////////////////////////////////////////////////////
+
+String Text="...You can enter any text here.\n\
+You can use the commands here to go to a new line...\n\";
+
+int LaserStarter=2;
+int LaserTransmitter=12;
+int dt=15; //milliseconds
+int bits=0;
+
+void setup() {
+Serial.begin(9600);
+pinMode(LaserStarter,OUTPUT);
+pinMode(LaserTransmitter,OUTPUT);
+}
+void loop(){
+  digitalWrite(LaserStarter,LOW);
+  for(int k=0; k<Text.length(); k++){
+    char Char = Text.charAt(k);
+    digitalWrite(LaserStarter,HIGH);
+    for(int i=0; i<8; i++){
+      byte bits = bitRead(Char,i);
+      digitalWrite(LaserTransmitter,bits);
+      delay (dt); 
+      }
+    digitalWrite(LaserStarter,LOW);
+    delay (dt);
+   }
+Author:"Mustafa RABUS";
+}
+
+// 2) RECEIVER MICROCONTROLLER CODES:
+////////////////////////////////////////////////////////////////////////////////////////////
+// EACH CHAR COMING TO THE SENSOR IN BITS IS CONVERTED INTO A STRING EXPRESSION AND PRINTED:
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#include <math.h>
+int SensorStarter=2;
+int SensorReceiver=12;
+int dt=15; //milliseconds
+int pulse=0;
+int Dec=0;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(SensorStarter,INPUT);
+  pinMode(SensorReceiver,INPUT);
+}
+void loop(){
+  if (digitalRead(SensorStarter)==1){
+    for(int i=0; i<8; i++){
+      pulse = digitalRead(SensorReceiver);
+      Dec=Dec+pulse*int(pow(2,i)+0.5);
+      if (digitalRead(SensorStarter)==0)break;
+      delay(dt);
+      }
+  Serial.print(char(Dec));
+  Dec=0;
+  delay (dt);
+  }
+Author:"Mustafa RABUS";
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
